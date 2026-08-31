@@ -1371,3 +1371,256 @@ body {
   max-width: 1400px;
   margin: 0 auto;
 }
+
+/* ─── Recovery ───────────────────────────────────────────────────────────── */
+
+.recovery-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.recovery-stat {
+  min-height: 120px;
+  padding: var(--space-5);
+
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.recovery-stat__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.recovery-stat__value {
+  margin-top: var(--space-3);
+
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+
+  color: var(--text-primary);
+}
+
+.recovery-stat__value--success {
+  color: var(--success);
+}
+
+.recovery-stat__sub {
+  margin-top: var(--space-1);
+
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* Lifecycle */
+
+.recovery-lifecycle {
+  display: flex;
+  align-items: center;
+
+  padding: var(--space-6);
+
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  overflow-x: auto;
+}
+
+.recovery-lifecycle__item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 145px;
+}
+
+.recovery-lifecycle__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  min-width: 115px;
+}
+
+.recovery-lifecycle__number {
+  display: grid;
+  place-items: center;
+
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid var(--border-hover);
+  border-radius: 50%;
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+
+  background: var(--accent-dim);
+}
+
+.recovery-lifecycle__title {
+  margin-top: var(--space-2);
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.recovery-lifecycle__subtitle {
+  margin-top: 2px;
+
+  font-size: 10px;
+  color: var(--text-tertiary);
+
+  text-align: center;
+}
+
+.recovery-lifecycle__arrow {
+  flex: 1;
+
+  margin: 0 var(--space-2);
+
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Candidate */
+
+.recovery-candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.recovery-candidate {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.recovery-candidate:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+}
+
+.recovery-candidate__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: var(--space-4);
+
+  padding: var(--space-5);
+
+  border-bottom: 1px solid var(--border);
+}
+
+.recovery-candidate__identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.recovery-candidate__eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  color: var(--text-tertiary);
+}
+
+.recovery-candidate__order {
+  margin-top: 5px;
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+
+  color: var(--text-primary);
+
+  overflow-wrap: anywhere;
+}
+
+.recovery-candidate__date {
+  margin-top: 4px;
+
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.recovery-candidate__financial {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  padding: var(--space-4) var(--space-5);
+
+  gap: var(--space-6);
+}
+
+.recovery-field__label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  color: var(--text-tertiary);
+}
+
+.recovery-field__value {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  color: var(--text-secondary);
+}
+
+.recovery-field__value--warning {
+  color: var(--warning);
+}
+
+@media (max-width: 1000px) {
+  .recovery-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recovery-candidate__financial {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .recovery-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recovery-candidate__main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .recovery-candidate__financial {
+    grid-template-columns: 1fr;
+  }
+}

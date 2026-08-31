@@ -92,3 +92,142 @@ export interface ObligationTimelineResponse {
   payment_attempts: PaymentAttempt[];
   state_transitions: ObligationStateTransition[];
 }
+
+// ─── Recovery ────────────────────────────────────────────────────────────────
+
+export interface RecoveryPrediction {
+  obligation_id: string;
+  candidate_action: string;
+  probability: number;
+  model_version: string;
+  feature_schema_version: number;
+}
+
+export interface RecoveryFeatureSnapshot {
+  id: string;
+  obligation_id: string;
+  feature_schema_version: number;
+  features: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RecoveryDecisionSummary {
+  id: string;
+  action: string;
+  status: string;
+  incremental_probability: number;
+  expected_incremental_amount: number;
+  created_at: string;
+}
+
+export interface FirewallEvaluationResponse {
+  decision_id: string;
+  result: "ALLOW" | "BLOCK" | "EXPIRE";
+  reason_code: string;
+  reason: string;
+  checks: Record<string, boolean>;
+  state_version_expected: number;
+  state_version_actual: number;
+}
+
+export interface DecisionAudit {
+  decision: {
+    id: string;
+    obligation_id: string;
+    state_version: number;
+    action: string;
+    status: string;
+    created_at: string;
+  };
+  evaluations: Array<{
+    result: string;
+    reason_code: string;
+    checks: Record<string, boolean>;
+    created_at: string;
+  }>;
+  executions: Array<{
+    status: string;
+    idempotency_key: string;
+    executed_at: string | null;
+  }>;
+}
+
+export interface RecoveryExecutionResponse {
+  id: string;
+  status: string;
+  razorpay_reference_id: string | null;
+  razorpay_payment_link_id: string | null;
+  short_url: string | null;
+}
+
+// ─── Recovery ────────────────────────────────────────────────────────────────
+
+export interface RecoveryDecision {
+  id: string;
+  obligation_id?: string;
+  action: string;
+  status: string;
+  baseline_probability?: number | null;
+  action_probability?: number | null;
+  incremental_probability: number | null;
+  expected_incremental_amount: number | null;
+  state_version?: number;
+  model_version?: string | null;
+  llm_diagnosis?: string | null;
+  created_at?: string;
+}
+
+export interface RecoveryDecisionListItem {
+  id: string;
+  action: string;
+  status: string;
+  incremental_probability: number | null;
+  expected_incremental_amount: number | null;
+  created_at: string;
+}
+
+export interface FirewallEvaluation {
+  result: "ALLOW" | "BLOCK" | "EXPIRE";
+  reason_code: string;
+  reason: string;
+  checks: Record<string, boolean>;
+  state_version_expected: number;
+  state_version_actual: number;
+}
+
+export interface RecoveryEvaluationResponse {
+  decision_id: string;
+  result: "ALLOW" | "BLOCK" | "EXPIRE";
+  reason_code: string;
+  reason: string;
+  checks: Record<string, boolean>;
+  state_version_expected: number;
+  state_version_actual: number;
+}
+
+export interface RecoveryExecution {
+  id: string;
+  decision_id: string;
+  status: string;
+  razorpay_reference_id: string | null;
+  razorpay_payment_link_id: string | null;
+  short_url: string | null;
+  executed_at: string | null;
+}
+
+export interface RecoveryDecisionAudit {
+  decision: {
+    id: string;
+    obligation_id: string;
+    state_version: number;
+    action: string;
+    status: string;
+    created_at: string;
+  };
+  evaluations: FirewallEvaluation[];
+  executions: {
+    status: string;
+    idempotency_key: string;
+    executed_at: string | null;
+  }[]
+}
