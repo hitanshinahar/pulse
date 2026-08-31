@@ -9,6 +9,8 @@ import os
 from backend.integrations.razorpay.client import verify_connection, RazorpayIntegrationError, RazorpayUpstreamError
 from backend.database import engine, Base, get_db
 from backend.webhooks.razorpay import router as razorpay_webhook_router
+from backend.api.financial import router as financial_router
+from backend.api.recovery import router as recovery_router
 from backend.models import RazorpayEvent
 from backend.config import settings
 
@@ -38,6 +40,8 @@ app = FastAPI(title="Recovery Firewall API", lifespan=lifespan)
 
 # Include webhook routers
 app.include_router(razorpay_webhook_router, prefix="/api/v1/webhooks")
+app.include_router(financial_router, prefix="/api/v1/financial")
+app.include_router(recovery_router, prefix="/api/v1/recovery")
 
 @app.get("/api/v1/health/razorpay")
 def health_razorpay():
