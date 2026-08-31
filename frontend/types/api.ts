@@ -66,3 +66,29 @@ export interface RazorpayHealthResponse {
   status: string;   // "success" on healthy
   message: string;
 }
+export interface PaymentAttempt {
+  id: string;
+  razorpay_payment_id: string;
+  amount: number;
+  currency: string;
+  payment_method: string | null;
+  razorpay_status: string;
+  created_at: string;
+}
+
+export interface ObligationStateTransition {
+  id: string;
+  previous_state: ObligationStatus | null;
+  new_state: ObligationStatus;
+  previous_version: number;
+  new_version: number;
+  reason: string | null;
+  source: string | null;
+  triggering_event_id: string | null;
+  created_at: string;
+}
+
+export interface ObligationTimelineResponse {
+  payment_attempts: PaymentAttempt[];
+  state_transitions: ObligationStateTransition[];
+}

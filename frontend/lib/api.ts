@@ -1,4 +1,6 @@
 import type {
+  Obligation,
+  ObligationTimelineResponse,
   ObligationsResponse,
   RevenueAtRiskResponse,
   RecoveryPolicy,
@@ -70,4 +72,18 @@ export async function fetchActivePolicy(): Promise<RecoveryPolicy> {
 
 export async function fetchRazorpayHealth(): Promise<RazorpayHealthResponse> {
   return apiFetch<RazorpayHealthResponse>("/api/v1/health/razorpay");
+}
+
+export async function fetchObligation(
+  obligationId: string
+): Promise<Obligation> {
+  return apiFetch<Obligation>(`/obligations/${obligationId}`);
+}
+
+export async function fetchObligationTimeline(
+  obligationId: string
+): Promise<ObligationTimelineResponse> {
+  return apiFetch<ObligationTimelineResponse>(
+    `/obligations/${obligationId}/timeline`
+  );
 }
