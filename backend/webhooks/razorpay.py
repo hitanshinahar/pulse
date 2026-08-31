@@ -9,7 +9,8 @@ import razorpay
 from backend.config import settings
 from backend.database import get_db
 from backend.models import RazorpayEvent
-from backend.events.processor import process_razorpay_event
+from backend.services.financial_state import process_razorpay_event
+from backend.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -87,8 +88,12 @@ async def razorpay_webhook(
         logger.error(f"Failed to persist event {x_razorpay_event_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error during ingestion")
 
-    # 5. Hand off processing to a background task
-    background_tasks.add_task(process_razorpay_event, new_event.id, db)
+    # 5. Hand off processing to a background task with a fresh session
+    async def run_webhook_processor(event_id: str):
+        async with AsyncSessionLocal() as session:
+            await process_razorpay_event(session, event_id)
+
+    background_tasks.add_task(run_webhook_processor, str(new_event.id))
 
     # 6. Acknowledge receipt quickly
     return JSONResponse(status_code=200, content={"status": "ok"})

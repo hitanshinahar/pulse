@@ -76,6 +76,5 @@ async def attribute_payment_to_recovery(db: AsyncSession, event: RazorpayEvent, 
     # Update execution status to reflect successful attribution
     execution.execution_status = outcome_status
     
-    await db.commit()
     logger.info(f"Successfully attributed payment {payment_id} to execution {execution.id} ({outcome_status})")
     return outcome
