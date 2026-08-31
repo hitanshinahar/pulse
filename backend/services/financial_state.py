@@ -12,6 +12,7 @@ from backend.models import (
     ObligationStateTransition
 )
 from backend.integrations.razorpay.client import get_razorpay_client
+from backend.services.recovery_outcome import attribute_payment_to_recovery
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +236,9 @@ async def _process_event_logic(db: AsyncSession, event: RazorpayEvent):
             source="razorpay_webhook"
         )
         db.add(transition)
+
+    # After financial state is completely updated, attempt recovery attribution
+    await attribute_payment_to_recovery(db, event, obligation)
 
 async def run_processor(db: AsyncSession, limit: int = 50):
     """

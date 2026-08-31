@@ -245,10 +245,32 @@ class RecoveryExecution(Base):
     action = Column(String, ForeignKey("recovery_action_definitions.action_id"), nullable=False)
     execution_status = Column(String, nullable=False, default="AUTHORIZED_PENDING_EXECUTION")
     idempotency_key = Column(String, unique=True, nullable=False)
-    external_reference = Column(String, nullable=True)
+    razorpay_reference_id = Column(String(40), unique=True, nullable=True)
+    razorpay_payment_link_id = Column(String, unique=True, nullable=True)
+    short_url = Column(String, nullable=True)
+    payment_link_created_at = Column(DateTime(timezone=True), nullable=True)
     state_version_at_check = Column(Integer, nullable=False)
     executed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     decision = relationship("RecoveryDecision")
     obligation = relationship("FinancialObligation")
+
+class RecoveryOutcome(Base):
+    __tablename__ = "recovery_outcomes"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    execution_id = Column(UUID(as_uuid=True), ForeignKey("recovery_executions.id"), nullable=False, unique=True)
+    obligation_id = Column(UUID(as_uuid=True), ForeignKey("financial_obligations.id"), nullable=False)
+    payment_id = Column(String, nullable=False)
+    amount_recovered = Column(Numeric(12, 2), nullable=False)
+    recovered_at = Column(DateTime(timezone=True), nullable=False)
+    time_to_recovery_seconds = Column(Integer, nullable=True)
+    outcome = Column(String, nullable=False) # RECOVERED, PARTIALLY_RECOVERED, NOT_RECOVERED
+    evidence_event_id = Column(UUID(as_uuid=True), ForeignKey("razorpay_events.id"), nullable=False)
+    attribution_type = Column(String, nullable=False) # RECOVERY_ATTRIBUTED, ORGANIC, UNKNOWN
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    execution = relationship("RecoveryExecution")
+    obligation = relationship("FinancialObligation")
+    evidence_event = relationship("RazorpayEvent")

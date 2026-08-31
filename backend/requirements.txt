@@ -14,4 +14,6 @@ asyncpg
 aiosqlite
 alembic
 scikit-learn
+pandas
 openai
+

@@ -166,3 +166,56 @@ async def create_policy(payload: Dict[str, Any], db: AsyncSession = Depends(get_
     db.add(policy)
     await db.commit()
     return {"status": "success", "policy_id": str(policy.id)}
+
+from backend.services.recovery_executor import execute_recovery
+from backend.services.recovery_reconciler import reconcile_unknown_execution
+
+@router.post("/executions/{execution_id}/execute")
+async def explicit_execute_recovery(execution_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Explicitly execute an authorized recovery action.
+    """
+    execution = await execute_recovery(db, execution_id)
+    return {
+        "id": str(execution.id),
+        "status": execution.execution_status,
+        "razorpay_reference_id": execution.razorpay_reference_id,
+        "razorpay_payment_link_id": execution.razorpay_payment_link_id,
+        "short_url": execution.short_url
+    }
+
+@router.get("/executions/{execution_id}")
+async def get_execution(execution_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Return execution state and outcome details.
+    """
+    stmt = select(RecoveryExecution).where(RecoveryExecution.id == execution_id)
+    execution = (await db.execute(stmt)).scalar_one_or_none()
+    
+    if not execution:
+        raise HTTPException(status_code=404, detail="Execution not found")
+
+    return {
+        "id": str(execution.id),
+        "decision_id": str(execution.decision_id),
+        "status": execution.execution_status,
+        "razorpay_reference_id": execution.razorpay_reference_id,
+        "razorpay_payment_link_id": execution.razorpay_payment_link_id,
+        "short_url": execution.short_url,
+        "executed_at": execution.executed_at.isoformat() if execution.executed_at else None
+    }
+
+@router.post("/executions/{execution_id}/reconcile")
+async def explicit_reconcile_execution(execution_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Explicitly reconcile an EXECUTION_UNKNOWN execution.
+    """
+    execution = await reconcile_unknown_execution(db, execution_id)
+    if not execution:
+        raise HTTPException(status_code=404, detail="Execution not found")
+        
+    return {
+        "id": str(execution.id),
+        "status": execution.execution_status
+    }
+
