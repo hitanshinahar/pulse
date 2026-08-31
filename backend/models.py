@@ -11,8 +11,9 @@ class UUID(TypeDecorator):
     impl = CHAR
     cache_ok = True
 
-    def __init__(self, as_uuid=False):
-        super(UUID, self).__init__(32)
+    def __init__(self, as_uuid=False, **kwargs):
+        kwargs.pop('length', None) # Remove length if alembic passes it
+        super(UUID, self).__init__(32, **kwargs)
         self.as_uuid = as_uuid
 
     def load_dialect_impl(self, dialect):
@@ -206,3 +207,48 @@ class RecoveryDecision(Base):
 
     obligation = relationship("FinancialObligation")
 
+class RecoveryPolicy(Base):
+    __tablename__ = "recovery_policies"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    merchant_id = Column(String, index=True, nullable=True)
+    max_autonomous_amount = Column(Numeric(12, 2), nullable=False)
+    max_actions_per_obligation = Column(Integer, nullable=False)
+    cooldown_seconds = Column(Integer, nullable=False)
+    allowed_actions = Column(JSON().with_variant(JSONB, 'postgresql'), nullable=False)
+    require_human_above_amount = Column(Boolean, default=True, nullable=False)
+    enabled = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+
+class FirewallEvaluation(Base):
+    __tablename__ = "firewall_evaluations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    decision_id = Column(UUID(as_uuid=True), ForeignKey("recovery_decisions.id"), nullable=False, index=True)
+    state_version_expected = Column(Integer, nullable=False)
+    state_version_actual = Column(Integer, nullable=False)
+    checks = Column(JSON().with_variant(JSONB, 'postgresql'), nullable=False)
+    result = Column(String, nullable=False) # ALLOW, BLOCK, EXPIRE
+    reason_code = Column(String, nullable=False)
+    reason = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    decision = relationship("RecoveryDecision")
+
+class RecoveryExecution(Base):
+    __tablename__ = "recovery_executions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    decision_id = Column(UUID(as_uuid=True), ForeignKey("recovery_decisions.id"), nullable=False, unique=True)
+    obligation_id = Column(UUID(as_uuid=True), ForeignKey("financial_obligations.id"), nullable=False)
+    action = Column(String, ForeignKey("recovery_action_definitions.action_id"), nullable=False)
+    execution_status = Column(String, nullable=False, default="AUTHORIZED_PENDING_EXECUTION")
+    idempotency_key = Column(String, unique=True, nullable=False)
+    external_reference = Column(String, nullable=True)
+    state_version_at_check = Column(Integer, nullable=False)
+    executed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    decision = relationship("RecoveryDecision")
+    obligation = relationship("FinancialObligation")

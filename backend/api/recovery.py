@@ -79,3 +79,90 @@ async def get_decisions(obligation_id: str, db: AsyncSession = Depends(get_db)):
             "created_at": d.created_at
         } for d in decisions
     ]
+
+from backend.models import RecoveryPolicy, FirewallEvaluation, RecoveryExecution
+from backend.services.recovery_firewall import evaluate_decision
+from typing import Dict, Any
+
+@router.post("/decisions/{decision_id}/evaluate")
+async def evaluate_recovery_decision(decision_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Evaluates a PROPOSED decision through the Recovery Firewall.
+    Does NOT execute external actions.
+    """
+    result = await evaluate_decision(db, decision_id)
+    return result
+
+@router.get("/decisions/{decision_id}/audit")
+async def get_decision_audit(decision_id: str, db: AsyncSession = Depends(get_db)):
+    stmt = select(RecoveryDecision).where(RecoveryDecision.id == decision_id)
+    decision = (await db.execute(stmt)).scalar_one_or_none()
+    
+    if not decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+        
+    stmt_evals = select(FirewallEvaluation).where(FirewallEvaluation.decision_id == decision.id).order_by(FirewallEvaluation.created_at)
+    evals = (await db.execute(stmt_evals)).scalars().all()
+    
+    stmt_execs = select(RecoveryExecution).where(RecoveryExecution.decision_id == decision.id)
+    execs = (await db.execute(stmt_execs)).scalars().all()
+    
+    return {
+        "decision": {
+            "id": str(decision.id),
+            "obligation_id": str(decision.obligation_id),
+            "state_version": decision.state_version,
+            "action": decision.action,
+            "status": decision.status,
+            "created_at": decision.created_at.isoformat()
+        },
+        "evaluations": [{
+            "result": e.result,
+            "reason_code": e.reason_code,
+            "checks": e.checks,
+            "created_at": e.created_at.isoformat()
+        } for e in evals],
+        "executions": [{
+            "status": ex.execution_status,
+            "idempotency_key": ex.idempotency_key,
+            "executed_at": ex.executed_at.isoformat() if ex.executed_at else None
+        } for ex in execs]
+    }
+
+@router.get("/policy")
+async def get_active_policy(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import desc
+    stmt = select(RecoveryPolicy).order_by(desc(RecoveryPolicy.created_at)).limit(1)
+    policy = (await db.execute(stmt)).scalar_one_or_none()
+    
+    if not policy:
+        raise HTTPException(status_code=404, detail="No policy found")
+        
+    return {
+        "id": str(policy.id),
+        "max_autonomous_amount": float(policy.max_autonomous_amount),
+        "max_actions_per_obligation": policy.max_actions_per_obligation,
+        "cooldown_seconds": policy.cooldown_seconds,
+        "allowed_actions": policy.allowed_actions,
+        "require_human_above_amount": policy.require_human_above_amount,
+        "enabled": policy.enabled
+    }
+
+@router.post("/policy")
+async def create_policy(payload: Dict[str, Any], db: AsyncSession = Depends(get_db)):
+    if payload.get("max_autonomous_amount", -1) < 0:
+        raise HTTPException(status_code=400, detail="Amount cannot be negative")
+    if payload.get("cooldown_seconds", -1) < 0:
+        raise HTTPException(status_code=400, detail="Cooldown cannot be negative")
+        
+    policy = RecoveryPolicy(
+        max_autonomous_amount=payload.get("max_autonomous_amount", 10000),
+        max_actions_per_obligation=payload.get("max_actions_per_obligation", 2),
+        cooldown_seconds=payload.get("cooldown_seconds", 21600),
+        allowed_actions=payload.get("allowed_actions", ["PAYMENT_LINK"]),
+        require_human_above_amount=payload.get("require_human_above_amount", True),
+        enabled=payload.get("enabled", True)
+    )
+    db.add(policy)
+    await db.commit()
+    return {"status": "success", "policy_id": str(policy.id)}
