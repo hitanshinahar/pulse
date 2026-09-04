@@ -21,11 +21,11 @@ export function TopBar({ page }: TopBarProps) {
         >
           {(() => {
             try {
-              return process.env.NEXT_PUBLIC_API_URL
-                ? new URL(process.env.NEXT_PUBLIC_API_URL).hostname
+              return process.env.BACKEND_URL
+                ? new URL(process.env.BACKEND_URL).hostname
                 : "—";
             } catch {
-              return process.env.NEXT_PUBLIC_API_URL ?? "—";
+              return process.env.BACKEND_URL ?? "—";
             }
           })()}
         </span>

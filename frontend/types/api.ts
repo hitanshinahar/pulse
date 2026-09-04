@@ -226,8 +226,24 @@ export interface RecoveryDecisionAudit {
   };
   evaluations: FirewallEvaluation[];
   executions: {
+    id: string;
     status: string;
     idempotency_key: string;
     executed_at: string | null;
   }[]
+}
+
+export interface RazorpayEvent {
+  id: string;
+  razorpay_event_id: string;
+  event_type: string;
+  parsed_payload: Record<string, unknown>;
+  status: string;
+  created_at: string;
+  processed_at: string | null;
+  error_msg: string | null;
+}
+
+export interface RazorpayEventsResponse {
+  events: RazorpayEvent[];
 }

@@ -73,7 +73,6 @@ def check_dev_mode():
 
 @app.get("/api/v1/events/razorpay")
 async def list_razorpay_events(db: AsyncSession = Depends(get_db)):
-    check_dev_mode()
     try:
         stmt = select(RazorpayEvent).order_by(RazorpayEvent.created_at.desc()).limit(100)
         result = await db.execute(stmt)

@@ -62,7 +62,7 @@ export function RecoveryCandidates({
                 await decisionResponse.json();
 
             const firewallResponse = await fetch(
-                `/api/recovery/decision/${decision.id}/evaluate`,
+                `/api/recovery/evaluate/${decision.id}`,
                 {
                     method: "POST",
                 }

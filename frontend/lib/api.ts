@@ -12,9 +12,12 @@ import type {
   RecoveryEvaluationResponse,
   RecoveryDecisionAudit,
   RecoveryExecution,
+  RazorpayEventsResponse,
 } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const BASE_URL =
+  process.env.BACKEND_URL ||
+  "http://localhost:8000";
 
 class ApiError extends Error {
   constructor(
@@ -122,6 +125,23 @@ export async function fetchActivePolicy(): Promise<RecoveryPolicy> {
   );
 }
 
+export async function savePolicy(
+  policy: Omit<RecoveryPolicy, "id">
+): Promise<{ status: string; policy_id: string }> {
+  return apiFetch<{ status: string; policy_id: string }>(
+    "/api/recovery/policy",
+    {
+      method: "POST",
+      body: JSON.stringify(policy),
+    },
+    { useProxy: true }
+  );
+}
+
+export async function fetchRazorpayEvents(): Promise<RazorpayEventsResponse> {
+  return apiFetch<RazorpayEventsResponse>("/api/v1/events/razorpay");
+}
+
 // ─── System Health ────────────────────────────────────────────────────────────
 
 export async function fetchRazorpayHealth(): Promise<RazorpayHealthResponse> {
@@ -155,9 +175,11 @@ export async function fetchRecoveryDecisions(
   obligationId: string
 ): Promise<RecoveryDecisionListItem[]> {
   return apiFetch<RecoveryDecisionListItem[]>(
-    `/api/recovery/decisions/${obligationId}`,
+    typeof window === "undefined"
+      ? `/api/v1/recovery/decisions/${obligationId}`
+      : `/api/recovery/decisions/${obligationId}`,
     undefined,
-    { useProxy: true }
+    typeof window === "undefined" ? undefined : { useProxy: true }
   );
 }
 
@@ -180,7 +202,8 @@ export async function evaluateRecoveryDecision(
     `/api/recovery/evaluate/${decisionId}`,
     {
       method: "POST",
-    }
+    },
+    { useProxy: true }
   );
 }
 

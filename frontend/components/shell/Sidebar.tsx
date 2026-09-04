@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface NavItem {
   href: string;
@@ -85,13 +86,26 @@ const secondaryNav: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    setCollapsed(window.localStorage.getItem("pulse-sidebar-collapsed") === "true");
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem("pulse-sidebar-collapsed", String(next));
+      return next;
+    });
+  }
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
   }
 
   return (
-    <aside className="sidebar" role="navigation" aria-label="Main navigation">
+    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`} role="navigation" aria-label="Main navigation">
       {/* Wordmark */}
       <div className="sidebar__header">
         <div className="sidebar__logo" aria-hidden="true">
@@ -102,6 +116,18 @@ export function Sidebar() {
         <span className="sidebar__wordmark">
           Pulse<span>.</span>
         </span>
+        <button
+          type="button"
+          className="sidebar__toggle"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+          aria-expanded={!collapsed}
+          title={collapsed ? "Expand navigation" : "Collapse navigation"}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d={collapsed ? "m6 3 5 5-5 5" : "m10 3-5 5 5 5"} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
 
       <div className="sidebar__body">
@@ -113,6 +139,7 @@ export function Sidebar() {
             href={item.href}
             className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
             aria-current={isActive(item.href) ? "page" : undefined}
+            title={collapsed ? item.label : undefined}
           >
             {item.icon}
             {item.label}
@@ -127,6 +154,7 @@ export function Sidebar() {
             href={item.href}
             className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
             aria-current={isActive(item.href) ? "page" : undefined}
+            title={collapsed ? item.label : undefined}
           >
             {item.icon}
             {item.label}

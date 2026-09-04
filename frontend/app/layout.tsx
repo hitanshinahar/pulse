@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pulse — Financial Recovery Platform",
+  title: "Pulse | Financial Recovery Platform",
   description:
     "Intelligent financial recovery and payment orchestration. Monitor obligations, decisions, and executions in real time.",
 };

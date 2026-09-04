@@ -123,6 +123,11 @@ body {
   border-right: 1px solid var(--border);
   overflow-y: auto;
   overflow-x: hidden;
+  transition: width var(--transition);
+}
+
+.sidebar--collapsed {
+  width: 60px;
 }
 
 .sidebar__header {
@@ -131,6 +136,30 @@ body {
   gap: var(--space-2);
   padding: var(--space-5) var(--space-4);
   border-bottom: 1px solid var(--border);
+}
+
+.sidebar__toggle {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidebar__toggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.sidebar__toggle svg {
+  width: 16px;
+  height: 16px;
 }
 
 .sidebar__wordmark {
@@ -226,6 +255,43 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.sidebar--collapsed .sidebar__header {
+  justify-content: center;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.sidebar--collapsed .sidebar__wordmark,
+.sidebar--collapsed .sidebar__section-label,
+.sidebar--collapsed .sidebar__item {
+  font-size: 0;
+}
+
+.sidebar--collapsed .sidebar__item {
+  justify-content: center;
+  gap: 0;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.sidebar--collapsed .sidebar__item-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar--collapsed .sidebar__footer {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.sidebar--collapsed .env-badge {
+  padding: 5px;
+}
+
+.sidebar--collapsed .env-badge {
+  font-size: 0;
+}
+
 .env-badge {
   display: inline-flex;
   align-items: center;
@@ -255,6 +321,34 @@ body {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+}
+
+.execution-table-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.execution-table {
+  min-width: 980px;
+}
+
+.execution-table th,
+.execution-table td {
+  white-space: nowrap;
+}
+
+.execution-table__truncate {
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.policy-field__label {
+  display: block;
+  color: var(--text-secondary);
 }
 
 /* ─── Top Bar ────────────────────────────────────────────────────────────────── */
