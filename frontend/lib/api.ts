@@ -28,9 +28,10 @@ class ApiError extends Error {
 
 async function apiFetch<T>(
   path: string,
-  init?: RequestInit
+  init?: RequestInit,
+  options?: { useProxy?: boolean }
 ): Promise<T> {
-  const url = `${BASE_URL}${path}`;
+  const url = options?.useProxy ? path : `${BASE_URL}${path}`;
 
   const res = await fetch(url, {
     ...init,
@@ -154,7 +155,9 @@ export async function fetchRecoveryDecisions(
   obligationId: string
 ): Promise<RecoveryDecisionListItem[]> {
   return apiFetch<RecoveryDecisionListItem[]>(
-    `/api/v1/recovery/decisions/${obligationId}`
+    `/api/recovery/decisions/${obligationId}`,
+    undefined,
+    { useProxy: true }
   );
 }
 
@@ -162,10 +165,11 @@ export async function createRecoveryDecision(
   obligationId: string
 ): Promise<RecoveryDecision> {
   return apiFetch<RecoveryDecision>(
-    `/api/v1/recovery/decision/${obligationId}`,
+    `/api/recovery/decision/${obligationId}`,
     {
       method: "POST",
-    }
+    },
+    { useProxy: true }
   );
 }
 
