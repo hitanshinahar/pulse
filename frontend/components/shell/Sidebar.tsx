@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 interface NavItem {
   href: string;
@@ -84,20 +84,28 @@ const secondaryNav: NavItem[] = [
   },
 ];
 
+const sidebarListeners = new Set<() => void>();
+
+function subscribeToSidebarState(listener: () => void) {
+  sidebarListeners.add(listener);
+  return () => sidebarListeners.delete(listener);
+}
+
+function getSidebarState() {
+  return window.localStorage.getItem("pulse-sidebar-collapsed") === "true";
+}
+
 export function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(window.localStorage.getItem("pulse-sidebar-collapsed") === "true");
-  }, []);
+  const collapsed = useSyncExternalStore(
+    subscribeToSidebarState,
+    getSidebarState,
+    () => false
+  );
 
   function toggleCollapsed() {
-    setCollapsed((current) => {
-      const next = !current;
-      window.localStorage.setItem("pulse-sidebar-collapsed", String(next));
-      return next;
-    });
+    window.localStorage.setItem("pulse-sidebar-collapsed", String(!collapsed));
+    sidebarListeners.forEach((listener) => listener());
   }
 
   function isActive(href: string) {
@@ -106,7 +114,6 @@ export function Sidebar() {
 
   return (
     <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`} role="navigation" aria-label="Main navigation">
-      {/* Wordmark */}
       <div className="sidebar__header">
         <div className="sidebar__logo" aria-hidden="true">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -131,38 +138,38 @@ export function Sidebar() {
       </div>
 
       <div className="sidebar__body">
-        {/* Primary nav */}
-        <p className="sidebar__section-label">Platform</p>
-        {primaryNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
-            aria-current={isActive(item.href) ? "page" : undefined}
-            title={collapsed ? item.label : undefined}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
-
-        {/* Secondary nav */}
-        <p className="sidebar__section-label" style={{ marginTop: "12px" }}>System</p>
-        {secondaryNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
-            aria-current={isActive(item.href) ? "page" : undefined}
-            title={collapsed ? item.label : undefined}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
+        <div className="sidebar__nav-group">
+          <p className="sidebar__section-label">Platform</p>
+          {primaryNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              title={collapsed ? item.label : undefined}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        <div className="sidebar__nav-group sidebar__nav-group--secondary">
+          <p className="sidebar__section-label">System</p>
+          {secondaryNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              title={collapsed ? item.label : undefined}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
-      {/* Footer */}
       <div className="sidebar__footer">
         <div className="env-badge">
           <span className="env-badge__dot" aria-hidden="true" />

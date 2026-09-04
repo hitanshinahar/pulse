@@ -127,7 +127,7 @@ body {
 }
 
 .sidebar--collapsed {
-  width: 60px;
+  width: 76px;
 }
 
 .sidebar__header {
@@ -150,6 +150,11 @@ body {
   border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
+}
+
+.sidebar--collapsed .sidebar__toggle {
+  border-color: var(--border);
+  background: var(--bg-elevated);
 }
 
 .sidebar__toggle:hover {
@@ -189,6 +194,12 @@ body {
   padding: var(--space-3) 0;
 }
 
+.sidebar__nav-group--secondary {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
 .sidebar__section-label {
   padding: var(--space-3) var(--space-4) var(--space-1);
   font-size: 10px;
@@ -202,6 +213,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-height: 40px;
   padding: 7px var(--space-4);
   font-size: 13.5px;
   font-weight: 450;
@@ -257,39 +269,60 @@ body {
 
 .sidebar--collapsed .sidebar__header {
   justify-content: center;
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
+  gap: var(--space-2);
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .sidebar--collapsed .sidebar__wordmark,
-.sidebar--collapsed .sidebar__section-label,
-.sidebar--collapsed .sidebar__item {
+.sidebar--collapsed .sidebar__section-label {
   font-size: 0;
 }
 
 .sidebar--collapsed .sidebar__item {
   justify-content: center;
+  font-size: 0;
+  min-height: 48px;
   gap: 0;
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
+  margin: 2px 8px;
+  padding: 0;
+  width: calc(100% - 16px);
+  border-radius: var(--radius);
+}
+
+.sidebar--collapsed .sidebar__item--active {
+  background: var(--accent-dim);
+}
+
+.sidebar--collapsed .sidebar__item--active::before {
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
 }
 
 .sidebar--collapsed .sidebar__item-icon {
-  width: 18px;
-  height: 18px;
+  width: 19px;
+  height: 19px;
+}
+
+.sidebar--collapsed .sidebar__nav-group--secondary {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
 }
 
 .sidebar--collapsed .sidebar__footer {
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
 }
 
 .sidebar--collapsed .env-badge {
-  padding: 5px;
-}
-
-.sidebar--collapsed .env-badge {
-  font-size: 0;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
 }
 
 .env-badge {

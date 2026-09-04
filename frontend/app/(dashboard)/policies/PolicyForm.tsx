@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { RecoveryPolicy } from "@/types/api";
 import { savePolicy } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
 
 export default function PolicyForm({ initial }: { initial: RecoveryPolicy }) {
     const [policy, setPolicy] = useState(initial);
