@@ -144,6 +144,18 @@ The recovery model is a versioned scikit-learn `LogisticRegression` pipeline tra
 
 The OpenAI integration produces a structured diagnosis containing a failure category, diagnostic confidence, evidence, and uncertainty. Diagnosis is advisory. If the LLM is unavailable, Pulse records an explicit uncertain diagnosis and continues with the deterministic policy and prediction result. The LLM does not select an authorized action, change policy, or call Razorpay.
 
+## AI Usage Report
+
+This project was built with a multi-model AI workflow to speed up design, implementation, debugging, and review across the stack:
+
+- Gemini 3.1 Pro — product and architecture reasoning
+- Gemini 3.8 Flash — rapid iteration and quick prototyping
+- GPT Luna 5.6 — the model used in the current VS Code Copilot workflow for implementation support
+- Claude Opus — high-level design review and strategic problem solving
+- Claude Sonnet 4.6 — day-to-day coding, refactoring, and debugging
+
+The AI layer was used as a builder and accelerator, but the financial control logic, runtime firewall, and policy enforcement remain deterministic and authoritative. This keeps the system aligned with the safety-first design requirement for autonomous recovery decisions.
+
 ## Dashboard
 
 The Next.js dashboard provides:
