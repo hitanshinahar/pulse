@@ -2,6 +2,7 @@ import os
 import uuid
 import hashlib
 import joblib
+from pathlib import PureWindowsPath
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
@@ -267,9 +268,15 @@ def get_model(version: str, artifact_uri: str):
     global _loaded_model, _loaded_version
     if _loaded_version == version and _loaded_model is not None:
         return _loaded_model
-    if not os.path.exists(artifact_uri):
+    artifact_path = artifact_uri
+    if not os.path.exists(artifact_path):
+        artifact_name = PureWindowsPath(artifact_uri).name
+        local_path = os.path.join(ARTIFACT_DIR, artifact_name)
+        if os.path.exists(local_path):
+            artifact_path = local_path
+    if not os.path.exists(artifact_path):
         raise ValueError(f"Model artifact not found at {artifact_uri}")
-    _loaded_model = joblib.load(artifact_uri)
+    _loaded_model = joblib.load(artifact_path)
     _loaded_version = version
     return _loaded_model
 

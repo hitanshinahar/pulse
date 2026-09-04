@@ -28,10 +28,9 @@ async def diagnose_failure(context_dict: Dict[str, Any]) -> LLMDiagnosis:
     {json.dumps(context_dict, indent=2)}
     """
     
-    client = get_openai_client()
-    model = os.environ.get("LLM_MODEL", "gpt-3.5-turbo")
-    
     try:
+        client = get_openai_client()
+        model = os.environ.get("LLM_MODEL", "gpt-3.5-turbo")
         response = await client.beta.chat.completions.parse(
             model=model,
             messages=[
@@ -47,6 +46,9 @@ async def diagnose_failure(context_dict: Dict[str, Any]) -> LLMDiagnosis:
         return LLMDiagnosis(
             failure_category="unknown",
             diagnostic_confidence=0.0,
-            evidence=[f"LLM investigation failed: {str(e)}"],
+            evidence=[
+                "LLM diagnosis unavailable; decision generated from deterministic "
+                "recovery policy and prediction model."
+            ],
             uncertainty=True
         )

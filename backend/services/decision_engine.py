@@ -11,7 +11,7 @@ from backend.models import (
 )
 from backend.services.feature_engine import extract_features
 from backend.services.ml_predictor import predict
-from backend.services.llm_investigator import diagnose_failure
+from backend.services.llm_investigator import diagnose_failure, LLMDiagnosis
 
 async def get_eligible_actions(db: AsyncSession, obligation: FinancialObligation):
     stmt = select(RecoveryActionDefinition).where(RecoveryActionDefinition.enabled == True)
@@ -44,7 +44,18 @@ async def evaluate_recovery_actions(db: AsyncSession, obligation_id: str) -> Rec
     features_dict = feature_snapshot.features
     
     # 3. Get LLM diagnosis
-    diagnosis = await diagnose_failure(features_dict)
+    try:
+        diagnosis = await diagnose_failure(features_dict)
+    except Exception:
+        diagnosis = LLMDiagnosis(
+            failure_category="unknown",
+            diagnostic_confidence=0.0,
+            evidence=[
+                "LLM diagnosis unavailable; decision generated from deterministic "
+                "recovery policy and prediction model."
+            ],
+            uncertainty=True,
+        )
     
     # 4. Get active ML model
     stmt = select(RecoveryModelVersion).where(RecoveryModelVersion.active == True)

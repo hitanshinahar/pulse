@@ -1,6 +1,8 @@
 import asyncio
 import uuid
 import json
+import hashlib
+import os
 from unittest.mock import patch
 from decimal import Decimal
 from datetime import datetime, timezone
@@ -17,6 +19,7 @@ from backend.services.decision_engine import evaluate_recovery_actions
 from backend.services.recovery_firewall import evaluate_decision
 from backend.services.recovery_executor import execute_recovery
 from backend.services.seed_actions import seed_action_registry
+from backend.services.ml_predictor import ARTIFACT_DIR
 
 from backend.integrations.razorpay.client import get_razorpay_client
 
@@ -44,15 +47,25 @@ async def setup_policy(db):
     # Seed Model
     stmt = select(RecoveryModelVersion).where(RecoveryModelVersion.active == True)
     res = await db.execute(stmt)
-    if not res.first():
+    active_model = res.scalar_one_or_none()
+    artifact_path = os.path.join(ARTIFACT_DIR, "model_v1788186906.joblib")
+    with open(artifact_path, "rb") as artifact:
+        artifact_checksum = hashlib.sha256(artifact.read()).hexdigest()
+
+    if active_model and active_model.artifact_uri.startswith("s3://"):
+        active_model.algorithm = "LogisticRegression"
+        active_model.artifact_uri = artifact_path
+        active_model.artifact_checksum = artifact_checksum
+        await db.commit()
+    elif not active_model:
         model = RecoveryModelVersion(
-            version="v1.0.test",
+            version="v1.0.local",
             dataset_version=1,
             feature_schema_version=1,
-            algorithm="xgboost",
+            algorithm="LogisticRegression",
             metrics={"auc": 0.9},
-            artifact_uri="s3://dummy/model",
-            artifact_checksum="checksum123",
+            artifact_uri=artifact_path,
+            artifact_checksum=artifact_checksum,
             active=True
         )
         db.add(model)
