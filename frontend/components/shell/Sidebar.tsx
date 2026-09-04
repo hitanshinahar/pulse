@@ -161,6 +161,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
               aria-current={isActive(item.href) ? "page" : undefined}
               title={isCollapsed ? item.label : undefined}
@@ -176,6 +177,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
               aria-current={isActive(item.href) ? "page" : undefined}
               title={isCollapsed ? item.label : undefined}

@@ -188,14 +188,16 @@ export default async function ObligationDetailPage({
     const { id } = await params;
 
     let obligation;
+    let timeline;
 
     try {
-        obligation = await fetchObligation(id);
+        [obligation, timeline] = await Promise.all([
+            fetchObligation(id),
+            fetchObligationTimeline(id),
+        ]);
     } catch {
         notFound();
     }
-
-    const timeline = await fetchObligationTimeline(id);
 
     const hasPayments = timeline.payment_attempts.length > 0;
     const hasTransitions = timeline.state_transitions.length > 0;
