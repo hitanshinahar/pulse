@@ -321,7 +321,3 @@ Keep OpenAI, database, Razorpay, and webhook secrets only in the backend environ
 - Historical customer features are limited by the fields currently persisted in the database.
 - Authentication and tenant isolation are not implemented as a complete production access-control layer.
 - The dashboard is an operational prototype and does not replace production monitoring, secrets management, or incident response.
-
-## Hackathon
-
-Pulse was built for the Razorpay AI Buildathon 2026, Track 03: AI Revenue Recovery.
