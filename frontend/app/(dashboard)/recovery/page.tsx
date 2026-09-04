@@ -2,12 +2,22 @@ import {
     fetchObligations,
     fetchRecoveryDecisions,
 } from "@/lib/api";
+
 import type { RecoveryDecisionListItem } from "@/types/api";
+
 import { formatCurrency, formatDate } from "@/lib/utils";
+import RecoveryCandidate from "@/components/recovery/RecoveryCandidate";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export const dynamic = "force-dynamic";
 
+async function getCandidateDecisions(obligationId: string) {
+    try {
+        return await fetchRecoveryDecisions(obligationId);
+    } catch {
+        return [];
+    }
+}
 export default async function RecoveryPage() {
     const obligationsResponse = await fetchObligations({ limit: 50 });
 
@@ -178,98 +188,35 @@ export default async function RecoveryPage() {
                     </div>
                 ) : (
                     <div className="recovery-candidate-list">
-                        {eligible.map((obligation) => (
+                        {(
+                            await Promise.all(
+                                eligible.map(async (obligation) => {
+                                    let decisions: RecoveryDecisionListItem[] = [];
+
+                                    try {
+                                        decisions = await fetchRecoveryDecisions(
+                                            obligation.id
+                                        );
+                                    } catch {
+                                        decisions = [];
+                                    }
+
+                                    return {
+                                        obligation,
+                                        decisions,
+                                    };
+                                })
+                            )
+                        ).map(({ obligation, decisions }) => (
                             <RecoveryCandidate
                                 key={obligation.id}
                                 obligation={obligation}
+                                initialDecisions={decisions}
                             />
                         ))}
                     </div>
                 )}
             </section>
-        </div>
-    );
-}
-
-async function RecoveryCandidate({
-    obligation,
-}: {
-    obligation: Awaited<ReturnType<typeof fetchObligations>>["data"][number];
-}) {
-    let decisions: RecoveryDecisionListItem[] = [];
-
-    try {
-        decisions = await fetchRecoveryDecisions(obligation.id);
-    } catch {
-        decisions = [];
-    }
-
-    const latestDecision = decisions[decisions.length - 1];
-
-    return (
-        <div className="recovery-candidate">
-            <div className="recovery-candidate__main">
-                <div className="recovery-candidate__identity">
-                    <span className="recovery-candidate__eyebrow">
-                        Financial obligation
-                    </span>
-
-                    <span className="recovery-candidate__order">
-                        {obligation.razorpay_order_id}
-                    </span>
-
-                    <span className="recovery-candidate__date">
-                        Updated {formatDate(obligation.updated_at)}
-                    </span>
-                </div>
-
-                <StatusBadge status={obligation.status} />
-            </div>
-
-            <div className="recovery-candidate__financial">
-                <div>
-                    <span className="recovery-field__label">
-                        Outstanding
-                    </span>
-
-                    <span className="recovery-field__value recovery-field__value--warning">
-                        {formatCurrency(
-                            obligation.outstanding_amount,
-                            obligation.currency
-                        )}
-                    </span>
-                </div>
-
-                <div>
-                    <span className="recovery-field__label">
-                        Decisions
-                    </span>
-
-                    <span className="recovery-field__value">
-                        {decisions.length}
-                    </span>
-                </div>
-
-                <div>
-                    <span className="recovery-field__label">
-                        Latest action
-                    </span>
-
-                    <span className="recovery-field__value">
-                        {latestDecision?.action || "Not evaluated"}
-                    </span>
-                </div>
-
-                <div>
-                    <span className="recovery-field__label">
-                        Decision state
-                    </span>
-
-                    <span className="recovery-field__value">
-                        {latestDecision?.status || "PENDING"}
-                    </span>
-                </div>
-            </div>
         </div>
     );
 }
