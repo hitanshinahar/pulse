@@ -2,6 +2,8 @@
 
 Pulse is an AI-powered revenue recovery and financial control platform for payment obligations.
 
+[Watch the video demo](https://drive.google.com/file/d/1hQ0FsB7_m-lAIpL1jfbCvTB_dbmoI4AC/view)
+
 ## Problem
 
 Failed and unfinished payments create revenue leakage. Blindly retrying a payment can duplicate customer contact, violate merchant policy, or trigger an action after the financial state has changed. Recovery needs current financial state, bounded policy, and an enforceable control point before an external payment action.
