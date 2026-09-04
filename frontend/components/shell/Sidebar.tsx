@@ -85,6 +85,7 @@ const secondaryNav: NavItem[] = [
 ];
 
 const sidebarListeners = new Set<() => void>();
+const mobileMediaQuery = "(max-width: 600px)";
 
 function subscribeToSidebarState(listener: () => void) {
   sidebarListeners.add(listener);
@@ -95,6 +96,16 @@ function getSidebarState() {
   return window.localStorage.getItem("pulse-sidebar-collapsed") === "true";
 }
 
+function subscribeToMobileState(listener: () => void) {
+  const mediaQuery = window.matchMedia(mobileMediaQuery);
+  mediaQuery.addEventListener("change", listener);
+  return () => mediaQuery.removeEventListener("change", listener);
+}
+
+function getMobileState() {
+  return window.matchMedia(mobileMediaQuery).matches;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const collapsed = useSyncExternalStore(
@@ -102,6 +113,12 @@ export function Sidebar() {
     getSidebarState,
     () => false
   );
+  const isMobile = useSyncExternalStore(
+    subscribeToMobileState,
+    getMobileState,
+    () => false
+  );
+  const isCollapsed = collapsed && !isMobile;
 
   function toggleCollapsed() {
     window.localStorage.setItem("pulse-sidebar-collapsed", String(!collapsed));
@@ -113,7 +130,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`} role="navigation" aria-label="Main navigation">
+    <aside className={`sidebar${isCollapsed ? " sidebar--collapsed" : ""}`} role="navigation" aria-label="Main navigation">
       <div className="sidebar__header">
         <div className="sidebar__logo" aria-hidden="true">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -127,12 +144,12 @@ export function Sidebar() {
           type="button"
           className="sidebar__toggle"
           onClick={toggleCollapsed}
-          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
-          aria-expanded={!collapsed}
-          title={collapsed ? "Expand navigation" : "Collapse navigation"}
+          aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
+          aria-expanded={!isCollapsed}
+          title={isCollapsed ? "Expand navigation" : "Collapse navigation"}
         >
           <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d={collapsed ? "m6 3 5 5-5 5" : "m10 3-5 5 5 5"} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={isCollapsed ? "m6 3 5 5-5 5" : "m10 3-5 5 5 5"} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
@@ -146,7 +163,7 @@ export function Sidebar() {
               href={item.href}
               className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
               aria-current={isActive(item.href) ? "page" : undefined}
-              title={collapsed ? item.label : undefined}
+              title={isCollapsed ? item.label : undefined}
             >
               {item.icon}
               {item.label}
@@ -161,7 +178,7 @@ export function Sidebar() {
               href={item.href}
               className={`sidebar__item${isActive(item.href) ? " sidebar__item--active" : ""}`}
               aria-current={isActive(item.href) ? "page" : undefined}
-              title={collapsed ? item.label : undefined}
+              title={isCollapsed ? item.label : undefined}
             >
               {item.icon}
               {item.label}
