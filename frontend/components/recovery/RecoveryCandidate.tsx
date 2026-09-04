@@ -25,7 +25,12 @@ interface DecisionResponse {
     state_version: number;
     model_version: string | null;
     status: string;
-    llm_diagnosis: string | null;
+    llm_diagnosis: {
+        failure_category?: string;
+        diagnostic_confidence?: number;
+        evidence?: string[];
+        uncertainty?: boolean;
+    } | null;
 }
 
 interface EvaluationResponse {
@@ -478,7 +483,36 @@ export default function RecoveryCandidate({
                                 <div className="recovery-decision__diagnosis">
                                     <span>AI diagnosis</span>
                                     <p>
-                                        {decision.llm_diagnosis}
+                                        Failure category:{" "}
+                                        {decision.llm_diagnosis.failure_category ||
+                                            "Unknown"}
+                                    </p>
+                                    <p>
+                                        Diagnostic confidence:{" "}
+                                        {typeof decision.llm_diagnosis
+                                            .diagnostic_confidence === "number"
+                                            ? `${(
+                                                decision.llm_diagnosis
+                                                    .diagnostic_confidence * 100
+                                            ).toFixed(1)}%`
+                                            : "—"}
+                                    </p>
+                                    <p>
+                                        Evidence:{" "}
+                                        {decision.llm_diagnosis.evidence?.length
+                                            ? decision.llm_diagnosis.evidence.join(
+                                                "; "
+                                            )
+                                            : "—"}
+                                    </p>
+                                    <p>
+                                        Uncertainty:{" "}
+                                        {typeof decision.llm_diagnosis
+                                            .uncertainty === "boolean"
+                                            ? decision.llm_diagnosis.uncertainty
+                                                ? "Yes"
+                                                : "No"
+                                            : "—"}
                                     </p>
                                 </div>
                             )}
